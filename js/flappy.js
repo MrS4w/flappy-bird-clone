@@ -15,7 +15,7 @@ function Barrier(reverse = false) {
     this.setHeight = height => body.style.height = `${height}px`
 }
 
-function Barriers(height, space, x) {
+function DoubleBarrier(height, space, x) {
     this.element = newElement('div', 'barriers')
 
     this.topBarrier = new Barrier(true)
@@ -39,5 +39,33 @@ function Barriers(height, space, x) {
     this.setX(x)
 }
 
-const b = new Barriers(550, 200, 400)
-document.querySelector('[flappy]').appendChild(b.element)
+function Barriers(height, width, space, distance, notifyPoint) {
+    this.doubleBarrier = [
+        new DoubleBarrier(height, space, width),
+        new DoubleBarrier(height, space, width + distance),
+        new DoubleBarrier(height, space, width + distance * 2),
+        new DoubleBarrier(height, space, width + distance * 3)
+    ]
+
+    const movement = 3
+    this.move = () => {
+        this.doubleBarrier.forEach(barriers => {
+            barriers.setX(barriers.getX() - movement)
+            if (barriers.getX() < -barriers.getWidth()) {
+                barriers.setX(barriers.getX() + distance * this.doubleBarrier.length)
+                barriers.randomSpace()
+            }
+
+            const middle = width / 2
+            const acrossMiddle = barriers.getX() + movement >= middle && barriers.getX() < middle
+            if (acrossMiddle) notifyPoint()
+        })
+    }
+}
+
+const barriers = new Barriers(550, 1200, 200, 400)
+const gameArea = document.querySelector('[flappy]')
+barriers.doubleBarrier.forEach(barriers => gameArea.appendChild(barriers.element))
+setInterval(() => {
+    barriers.move()
+}, 20)
