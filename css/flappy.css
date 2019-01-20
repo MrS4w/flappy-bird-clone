@@ -69,4 +69,5 @@ h1 {
     top: 10px;
     right: 10px;
     font-size: 3em;
+    z-index: 100;
 }

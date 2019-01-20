@@ -39,7 +39,7 @@ function DoubleBarrier(height, space, x) {
     this.setX(x)
 }
 
-function Barriers(height, width, space, distance, notifyPoint) {
+function Barriers(height, width, space, distance, showScore) {
     this.doubleBarrier = [
         new DoubleBarrier(height, space, width),
         new DoubleBarrier(height, space, width + distance),
@@ -58,7 +58,7 @@ function Barriers(height, width, space, distance, notifyPoint) {
 
             const middle = width / 2
             const acrossMiddle = barriers.getX() + movement >= middle && barriers.getX() < middle
-            // if (acrossMiddle) notifyPoint()
+             if (acrossMiddle) showScore()
         })
     }
 }
@@ -73,7 +73,7 @@ function Bird(gameHeight) {
 
     window.onkeydown = e => flying = true
     window.onkeyup = e => flying = false
-    
+
     this.move = () => {
         const newY = this.getY() + (flying ? 7 : -4)
         const maxHeight = gameHeight - this.element.clientHeight
@@ -90,13 +90,36 @@ function Bird(gameHeight) {
     this.setY(gameHeight / 2)
 }
 
-const barriers = new Barriers(550, 1200, 200, 400)
-const bird = new Bird(550)
-const gameArea = document.querySelector('[flappy]')
+function Progress() {
+    this.element = newElement('span', 'progress')
+    this.updateScore = score => {
+        this.element.innerHTML = score
+    }
+    this.updateScore(0)
+}
 
-gameArea.appendChild(bird.element)
-barriers.doubleBarrier.forEach(barriers => gameArea.appendChild(barriers.element))
-setInterval(() => {
-    barriers.move()
-    bird.move()
-}, 20)
+
+function FlappyBird() {
+    let score = 0
+
+    const gameArea = document.querySelector('[flappy]')
+    const height = gameArea.clientHeight
+    const width = gameArea.clientWidth
+
+    const progress = new Progress()
+    const barriers = new Barriers(height, width, 200, 350, () => progress.updateScore(++score))
+    const bird = new Bird(height)
+
+    gameArea.appendChild(progress.element)
+    gameArea.appendChild(bird.element)
+    barriers.doubleBarrier.forEach(bar => gameArea.appendChild(bar.element))
+
+    this.start = () => {
+        const timer = setInterval(() => {
+            barriers.move()
+            bird.move()
+        }, 20)
+    }
+}
+
+new FlappyBird().start()
