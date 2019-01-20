@@ -58,7 +58,7 @@ function Barriers(height, width, space, distance, showScore) {
 
             const middle = width / 2
             const acrossMiddle = barriers.getX() + movement >= middle && barriers.getX() < middle
-             if (acrossMiddle) showScore()
+            if (acrossMiddle) showScore()
         })
     }
 }
@@ -98,6 +98,29 @@ function Progress() {
     this.updateScore(0)
 }
 
+function hasOverlap(element1, element2) {
+    const elementA = element1.getBoundingClientRect()
+    const elementB = element2.getBoundingClientRect()
+
+    const horizontal = elementA.left - elementA.width >= elementB.left
+        && elementB.left + elementB.width >= elementA.left
+    const vertical = elementA.top + elementA.height >= elementB.top
+        && elementB.top + elementB.height >= elementA.top
+    return horizontal && vertical
+}
+
+function overlapped(bird, barriers) {
+    let overlapped = false
+    barriers.doubleBarrier.forEach(doubleBarrier => {
+        if (!overlapped) {
+            const topBarrier = doubleBarrier.topBarrier.element
+            const bottomBarrier = doubleBarrier.bottomBarrier.element
+            overlapped = hasOverlap(bird.element, topBarrier) || hasOverlap(bird.element, bottomBarrier)
+
+        }
+    })
+    return overlapped
+}
 
 function FlappyBird() {
     let score = 0
@@ -107,7 +130,7 @@ function FlappyBird() {
     const width = gameArea.clientWidth
 
     const progress = new Progress()
-    const barriers = new Barriers(height, width, 200, 350, () => progress.updateScore(++score))
+    const barriers = new Barriers(height, width, 200, 400, () => progress.updateScore(++score))
     const bird = new Bird(height)
 
     gameArea.appendChild(progress.element)
@@ -118,6 +141,9 @@ function FlappyBird() {
         const timer = setInterval(() => {
             barriers.move()
             bird.move()
+            if (overlapped(bird, barriers)) {
+                clearInterval(timer)
+            }
         }, 20)
     }
 }
