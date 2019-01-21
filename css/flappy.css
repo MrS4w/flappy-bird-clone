@@ -71,3 +71,8 @@ h1 {
     font-size: 3em;
     z-index: 100;
 }
+
+footer {
+    padding: 5px;
+    text-align: center;
+}
